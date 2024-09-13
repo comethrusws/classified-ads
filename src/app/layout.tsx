@@ -8,8 +8,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Marketplace",
-  description: "My cool marketplace",
+  title: "Home | classifiedAds",
+  description: "Hello World",
 };
 
 export default async function RootLayout({

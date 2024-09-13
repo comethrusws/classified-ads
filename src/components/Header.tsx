@@ -16,7 +16,7 @@ export default function Header({session}:{session:Session|null}) {
       <Link
         className="text-blue-600 font-bold text-2xl"
         href="/">
-        Marketplace
+        classiiedAds
       </Link>
       <nav className="flex items-center gap-4 *:rounded">
         <Link href="/new" className="border border-blue-600 text-blue-600 inline-flex gap-1 items-center py-1 px-4 mr-4">
