@@ -1,41 +1,34 @@
-'use client';
-import {Loader} from "@googlemaps/js-api-loader";
-import {createRef, HTMLAttributes, useEffect} from "react";
+import React from 'react';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
-type Props = HTMLAttributes<HTMLDivElement> & {
-  location: number[];
+// Fix for default marker icon
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-shadow.png',
+});
+
+type Props = React.HTMLAttributes<HTMLDivElement> & {
+  location: [number, number]; // [longitude, latitude]
 };
 
-export default function LocationMap({location, ...divProps}:Props) {
-  const mapsDivRef = createRef<HTMLDivElement>();
-
-  useEffect(() => {
-    loadMap();
-  }, []);
-
-  async function loadMap() {
-    const loader = new Loader({
-      apiKey: process.env.NEXT_PUBLIC_MAPS_KEY as string,
-    });
-    const {Map} = await loader.importLibrary('maps');
-    const {AdvancedMarkerElement} = await loader.importLibrary('marker');
-    const map = new Map(mapsDivRef.current as HTMLDivElement, {
-      mapId: 'map',
-      center: {lng:location[0], lat:location[1]},
-      zoom: 6,
-      mapTypeControl: false,
-      streetViewControl: false,
-      zoomControl: true,
-    });
-    new AdvancedMarkerElement({
-      map,
-      position: {lng:location[0], lat:location[1]},
-    });
-  }
-
+export default function LocationMap({ location, ...divProps }: Props) {
   return (
-    <>
-      <div {...divProps} ref={mapsDivRef}></div>
-    </>
+    <div {...divProps}>
+      <MapContainer
+        center={[location[1], location[0]]} // Leaflet uses [latitude, longitude]
+        zoom={6}
+        style={{ height: '100%', width: '100%' }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        <Marker position={[location[1], location[0]]} />
+      </MapContainer>
+    </div>
   );
 }

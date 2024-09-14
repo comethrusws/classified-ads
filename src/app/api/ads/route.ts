@@ -4,7 +4,7 @@ import {Ad, AdModel} from "@/models/Ad";
 import {FilterQuery, PipelineStage} from "mongoose";
 import {getServerSession} from "next-auth";
 
-export async function GET(req: Request) {
+export async function GET(req: Request, res: Response) {
   await connect();
   const {searchParams} = new URL(req.url);
 
@@ -17,55 +17,55 @@ export async function GET(req: Request) {
 
   const filter: FilterQuery<Ad> = {};
   const aggregationSteps: PipelineStage[] = [];
-  
   if (phrase) {
-    filter.title = { $regex: '.*' + phrase + '.*', $options: 'i' };
+    filter.title = {$regex: '.*' + phrase + '.*', $options: 'i'};
   }
   if (category) {
     filter.category = category;
   }
-  if (min && !max) filter.price = { $gte: Number(min) };
-  if (max && !min) filter.price = { $lte: Number(max) };
-  if (min && max) filter.price = { $gte: Number(min), $lte: Number(max) };
+  if (min && !max) filter.price = {$gte: min};
+  if (max && !min) filter.price = {$lte: max};
+  if (min && max) filter.price = {$gte: min, $lte: max};
 
   if (radius && center) {
     const coords = center.split('-');
     const lat = parseFloat(coords[0]);
     const lng = parseFloat(coords[1]);
-    aggregationSteps.push({
-      $geoNear: {
-        near: {
-          type: 'Point',
-          coordinates: [lng, lat]
-        },
-        query: filter,
-        includeLocs: 'location',
-        distanceField: 'distance',
-        maxDistance: parseInt(radius),
-        spherical: true,
+    aggregationSteps.push(
+      {
+        $geoNear: {
+          near: {
+            type: 'Point',
+            coordinates: [lng, lat]
+          },
+          query: filter,
+          includeLocs: 'location',
+          distanceField: 'distance',
+          maxDistance: parseInt(radius),
+          spherical: true,
+        }
       }
-    });
+    );
   }
-  
   aggregationSteps.push({
-    $sort: { createdAt: -1 },
+    $sort: {createdAt: -1},
   });
 
-  const adsDocs = await AdModel.aggregate(aggregationSteps).exec();
-  return Response.json(adsDocs.map(doc => doc.toObject())); // Ensure plain object
+  const adsDocs = await AdModel.aggregate(aggregationSteps);
+
+  // No need to call toObject() on plain objects
+  return new Response(JSON.stringify(adsDocs), {status: 200, headers: {'Content-Type': 'application/json'}});
 }
 
 export async function DELETE(req: Request) {
   const url = new URL(req.url);
   const id = url.searchParams.get('id');
   await connect();
-  const adDoc = await AdModel.findById(id).lean(); // Use .lean() to get plain object
+  const adDoc = await AdModel.findById(id);
   const session = await getServerSession(authOptions);
-  
   if (!adDoc || adDoc.userEmail !== session?.user?.email) {
-    return Response.json(false);
+    return new Response(JSON.stringify(false), {status: 403, headers: {'Content-Type': 'application/json'}});
   }
-  
   await AdModel.findByIdAndDelete(id);
-  return Response.json(true);
+  return new Response(JSON.stringify(true), {status: 200, headers: {'Content-Type': 'application/json'}});
 }
