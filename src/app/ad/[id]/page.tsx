@@ -3,29 +3,40 @@
 import DeleteAdButton from "@/components/DeleteAdButton";
 import Gallery from "@/components/Gallery";
 import LocationMap from "@/components/LocationMap";
-import {authOptions} from "@/libs/authOptions";
-import {connect, formatDate, formatMoney} from "@/libs/helpers";
-import {AdModel} from "@/models/Ad";
-import {faPencil} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {getServerSession} from "next-auth";
+import { authOptions } from "@/libs/authOptions";
+import { connect, formatDate, formatMoney } from "@/libs/helpers";
+import { AdModel } from "@/models/Ad";
+import { faPencil } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { getServerSession } from "next-auth";
 import Link from "next/link";
+import mongoose from 'mongoose';
 
 type Props = {
   params: {
     id: string;
   };
-  searchParams: {[key: string] : string};
+  searchParams: { [key: string]: string };
 };
 
 export default async function SingleAdPage(args: Props) {
   await connect();
-  const adDoc = await AdModel.findById(args.params.id);
+  
+  const adId = args.params.id;
+  if (!mongoose.Types.ObjectId.isValid(adId)) {
+    return 'Invalid ad ID!';
+  }
+
+  // Fetch the ad document and convert it to a plain object
+  const adDoc = await AdModel.findById(adId).lean();
   const session = await getServerSession(authOptions);
 
   if (!adDoc) {
     return 'Not found!';
   }
+
+  // Convert the location to the required format
+  const location: [number, number] = [adDoc.location.coordinates[1], adDoc.location.coordinates[0]];
 
   return (
     <div className="flex absolute inset-0 top-16">
@@ -45,14 +56,14 @@ export default async function SingleAdPage(args: Props) {
         )}
         <label>Price</label>
         <p>{formatMoney(adDoc.price)}</p>
-        <label>category</label>
+        <label>Category</label>
         <p>{adDoc.category}</p>
-        <label>description</label>
+        <label>Description</label>
         <p className="text-sm">{adDoc.description}</p>
-        <label>contact</label>
+        <label>Contact</label>
         <p>{adDoc.contact}</p>
-        <label>location</label>
-        <LocationMap className="w-full h-48" location={adDoc.location.coordinates} />
+        <label>Location</label>
+        <LocationMap location={location} />
         <p className="mt-4 text-xs text-gray-400">
           Posted: {formatDate(adDoc.createdAt)}<br />
           Last update: {formatDate(adDoc.updatedAt)}
