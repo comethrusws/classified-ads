@@ -16,7 +16,7 @@ export default function Header({session}:{session:Session|null}) {
       <Link
         className="text-blue-600 font-bold text-2xl"
         href="/">
-        classiiedAds
+        classifiedAds
       </Link>
       <nav className="flex items-center gap-4 *:rounded">
         <Link href="/new" className="border border-blue-600 text-blue-600 inline-flex gap-1 items-center py-1 px-4 mr-4">
@@ -40,7 +40,7 @@ export default function Header({session}:{session:Session|null}) {
               <button onClick={() => setShowDropdown(prev => !prev)}>
                 <Image
                   src={session.user.image as string} alt={'avatar'} width={36} height={36}
-                  className={"rounded-md relative "+(showDropdown?'z-50':'')}
+                  className={"rounded-full relative "+(showDropdown?'z-50':'')}
                 />
               </button>
               {showDropdown && (

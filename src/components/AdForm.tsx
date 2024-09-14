@@ -57,7 +57,7 @@ export default function AdForm({
 
         <div className="mt-8">
           <div className="flex justify-between items-center mb-1">
-            <label htmlFor="" className="mt-0 mb-0">Where</label>
+            <label htmlFor="" className="mt-0 mb-0">Where are you?</label>
             <div>
               <button
                 type="button"

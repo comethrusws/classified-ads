@@ -57,7 +57,7 @@ export default function AdTextInputs({defaultValues}:Props) {
       <textarea
         name="contact"
         id="contactIn"
-        placeholder="mobile: +46 723 123 123"
+        placeholder="mobile: +977 982 134 5642"
         defaultValue={defaultValues.contact}
       ></textarea>
     </>
