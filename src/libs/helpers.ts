@@ -13,7 +13,7 @@ export const categories = [
 ];
 
 export function formatMoney(amount: number): string {
-  return '$' + Intl.NumberFormat('US', {currency: 'USD'}).format(amount);
+  return 'रू' + new Intl.NumberFormat('en-NP', { style: 'currency', currency: 'NPR', minimumFractionDigits: 2 }).format(amount).replace('NPR', '');
 }
 
 export function formatDate(date: Date):string {
